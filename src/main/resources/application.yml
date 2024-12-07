@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: springboot-rabbitmq-order-system-backend
+
+
+server:
+  port: 4242
