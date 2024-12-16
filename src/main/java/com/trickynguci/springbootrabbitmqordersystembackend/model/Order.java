@@ -1,33 +1,37 @@
 package com.trickynguci.springbootrabbitmqordersystembackend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long foodId;
+    private Long foodId; // ID món ăn
 
     @Column(nullable = false)
-    private int quantity;
+    private String customerName;
+
+    @Column(nullable = false)
+    private String customerAddress;
 
     @Column(nullable = false)
     private String status; // PENDING, IN_PROGRESS, COMPLETED
 
-    @Column(nullable = false)
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
-    @Column(nullable = true)
-    private Timestamp completedAt;
+    private LocalDateTime completedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant; // Nhà hàng được gán đơn
 }

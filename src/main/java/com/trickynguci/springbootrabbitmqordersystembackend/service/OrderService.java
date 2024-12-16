@@ -6,10 +6,12 @@ import java.util.List;
 
 public interface OrderService {
 
-    public Order createOrder(Long foodId, int quantity);
+    public Order createOrder(Order order);
 
-    public List<Order> getOrdersByStatus(String status);
+    public void processOrder(Long orderId);
 
     public Order updateOrderStatus(Long orderId, String status);
+
+    public List<Order> getAllOrders();
 
 }
