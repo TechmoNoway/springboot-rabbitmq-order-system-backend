@@ -37,6 +37,7 @@ dependencies {
     implementation 'org.springframework.integration:spring-integration-stomp'
     implementation 'org.springframework.integration:spring-integration-websocket'
     implementation 'org.springframework.security:spring-security-messaging'
+    implementation 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -1,7 +1,18 @@
 spring:
   application:
     name: springboot-rabbitmq-order-system-backend
-
-
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        concurrency: 1
+        max-concurrency: 10
+    template:
+      exchange: orderExchange
+      routing-key: order.routingKey
 server:
   port: 4242
