@@ -19,5 +19,6 @@ spring:
     template:
       exchange: orderExchange
       routing-key: order.routingKey
+    restaurantQueuePrefix: "restaurant.queue."
 server:
   port: 4242

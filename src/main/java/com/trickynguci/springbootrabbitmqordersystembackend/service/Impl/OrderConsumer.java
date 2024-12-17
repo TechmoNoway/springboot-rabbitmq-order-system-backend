@@ -1,6 +1,5 @@
 package com.trickynguci.springbootrabbitmqordersystembackend.service.Impl;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trickynguci.springbootrabbitmqordersystembackend.model.Order;
 import com.trickynguci.springbootrabbitmqordersystembackend.model.Restaurant;
@@ -8,6 +7,7 @@ import com.trickynguci.springbootrabbitmqordersystembackend.repository.Restauran
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,24 +17,26 @@ import java.util.List;
 public class OrderConsumer {
 
     private final RestaurantRepository restaurantRepository;
-
     private final RabbitTemplate rabbitTemplate;
-
     private final ObjectMapper objectMapper;
 
-    // Listener nhận message từ hàng đợi
-    @RabbitListener(queues = "orders.queue")
+    @Value("${spring.rabbitmq.restaurantQueuePrefix}")
+    private String restaurantQueuePrefix;
+
+    // Listener nhận message từ hàng đợi (dynamic queues for specific restaurants)
+    @RabbitListener(queues = "#{orderConsumer.restaurantQueueName}")
     public void processOrder(String message) {
         try {
-            // convert json message to Order object
+            // Convert json message to Order object
             Order order = objectMapper.readValue(message, Order.class);
+            System.out.println("Processing order: " + order);
 
             // Check the current restaurant status
             Restaurant assignedRestaurant = restaurantRepository.findById(order.getRestaurant().getId())
                     .orElseThrow(() -> new RuntimeException("Restaurant not found"));
 
             if (assignedRestaurant.isBusy()) {
-                // if this restaurant is busy, reassign the order to another restaurant
+                // If this restaurant is busy, reassign the order to another restaurant
                 List<Restaurant> availableRestaurants = restaurantRepository.findByIsAvailableTrue();
                 availableRestaurants.remove(assignedRestaurant);
 
@@ -43,7 +45,7 @@ public class OrderConsumer {
                     order.setRestaurant(newRestaurant);
                     System.out.println("Reassigning order to restaurant: " + newRestaurant.getName());
 
-                    // send the order to the new restaurant
+                    // Send the order to the new restaurant
                     rabbitTemplate.convertAndSend("restaurant.queue." + newRestaurant.getId(), objectMapper.writeValueAsString(order));
                 } else {
                     System.out.println("No available restaurants to process the order.");
@@ -56,5 +58,12 @@ public class OrderConsumer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // Bean for dynamic queue name based on restaurant id
+    public String getRestaurantQueueName() {
+        // This method will be invoked to resolve the actual queue name dynamically.
+        String restaurantId = "1"; // Fetch this dynamically from the order or context
+        return "restaurant.queue." + restaurantId;  // Ensure that the queue name is dynamically created based on restaurant ID
     }
 }

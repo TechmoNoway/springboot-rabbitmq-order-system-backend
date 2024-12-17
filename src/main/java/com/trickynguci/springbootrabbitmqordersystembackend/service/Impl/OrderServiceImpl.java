@@ -6,16 +6,14 @@ import com.trickynguci.springbootrabbitmqordersystembackend.repository.OrderRepo
 import com.trickynguci.springbootrabbitmqordersystembackend.repository.RestaurantRepository;
 import com.trickynguci.springbootrabbitmqordersystembackend.service.OrderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
