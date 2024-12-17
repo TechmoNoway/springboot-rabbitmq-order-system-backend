@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    container_name: 'rabbitmq'
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: rabbitmq
+    environment:
+      - 'RABBITMQ_DEFAULT_USER=guest'
+      - 'RABBITMQ_DEFAULT_PASS=guest'
+      - 'RABBITMQ_STOMP_ENABLED=true'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+      - '61613:61613'
+      - '15674:15674'
+    restart: always
