@@ -23,8 +23,7 @@ public class OrderConsumer {
     @Value("${spring.rabbitmq.restaurantQueuePrefix}")
     private String restaurantQueuePrefix;
 
-    // Listener nhận message từ hàng đợi (dynamic queues for specific restaurants)
-    @RabbitListener(queues = "#{orderConsumer.restaurantQueueName}")
+    // Method for processing orders
     public void processOrder(String message) {
         try {
             // Convert json message to Order object
@@ -61,9 +60,7 @@ public class OrderConsumer {
     }
 
     // Bean for dynamic queue name based on restaurant id
-    public String getRestaurantQueueName() {
-        // This method will be invoked to resolve the actual queue name dynamically.
-        String restaurantId = "1"; // Fetch this dynamically from the order or context
-        return "restaurant.queue." + restaurantId;  // Ensure that the queue name is dynamically created based on restaurant ID
+    public String getRestaurantQueueName(String restaurantId) {
+        return "restaurant.queue." + restaurantId;
     }
 }
