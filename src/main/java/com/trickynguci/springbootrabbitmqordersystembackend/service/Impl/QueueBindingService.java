@@ -25,7 +25,7 @@ public class QueueBindingService {
     public void initializeRestaurantQueues() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
 
-        if (restaurants == null || restaurants.isEmpty()) {
+        if (restaurants.isEmpty()) {
             System.out.println("No restaurants found. No queues will be created.");
             return; // No restaurants, no queues to create.
         }

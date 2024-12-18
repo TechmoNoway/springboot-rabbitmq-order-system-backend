@@ -1,6 +1,8 @@
 package com.trickynguci.springbootrabbitmqordersystembackend.config;
 
+import com.trickynguci.springbootrabbitmqordersystembackend.service.Impl.OrderConsumer;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -11,28 +13,34 @@ import org.springframework.context.annotation.Configuration;
 @EnableRabbit
 public class RabbitListenerConfig {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final OrderConsumer orderConsumer;
 
-    public RabbitListenerConfig(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
+    public RabbitListenerConfig(OrderConsumer orderConsumer) {
+        this.orderConsumer = orderConsumer;
     }
 
     @Bean
-    public MessageListenerContainer messageListenerContainer() {
-        // Dynamically create listener container for queues
+    public MessageListenerContainer messageListenerContainer(ConnectionFactory connectionFactory) {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitTemplate.getConnectionFactory());
-        container.setQueueNames("restaurant.queue.*");  // Replace with your dynamic queue name logic
-        container.setMessageListener((message) -> {
-            String restaurantId = extractRestaurantIdFromQueueName(message.getMessageProperties().getConsumerQueue());
-            // Process the message dynamically based on the queue (restaurant ID)
-            rabbitTemplate.convertAndSend("restaurant.queue." + restaurantId, message.getBody());
-        });
-        return container;
-    }
+        container.setConnectionFactory(connectionFactory);
 
-    // Utility method to extract restaurant ID from the queue name
-    private String extractRestaurantIdFromQueueName(String queueName) {
-        return queueName.replace("restaurant.queue.", "");
+        // Get the list of restaurant IDs dynamically or statically
+        // For example, let's assume restaurant IDs are "1", "2", and "3"
+        String[] restaurantIds = {"1", "2", "3"};
+
+        // Declare listeners for each restaurant queue
+        for (String restaurantId : restaurantIds) {
+            String queueName = "restaurant.queue." + restaurantId;
+            container.addQueueNames(queueName);
+        }
+
+        container.setMessageListener(message -> {
+            // Process the message here, the restaurant ID can be derived from the queue name
+            String queueName = message.getMessageProperties().getConsumerQueue();
+            String restaurantId = queueName.replace("restaurant.queue.", "");
+            orderConsumer.processOrder(message.getBody().toString(), restaurantId);
+        });
+
+        return container;
     }
 }

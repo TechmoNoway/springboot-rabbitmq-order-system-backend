@@ -5,7 +5,6 @@ import com.trickynguci.springbootrabbitmqordersystembackend.model.Order;
 import com.trickynguci.springbootrabbitmqordersystembackend.model.Restaurant;
 import com.trickynguci.springbootrabbitmqordersystembackend.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,11 +22,10 @@ public class OrderConsumer {
     @Value("${spring.rabbitmq.restaurantQueuePrefix}")
     private String restaurantQueuePrefix;
 
-    // Method for processing orders
-    public void processOrder(String message) {
+    public void processOrder(String orderMessage, String restaurantId) {
         try {
             // Convert json message to Order object
-            Order order = objectMapper.readValue(message, Order.class);
+            Order order = objectMapper.readValue(orderMessage, Order.class);
             System.out.println("Processing order: " + order);
 
             // Check the current restaurant status
@@ -52,7 +50,7 @@ public class OrderConsumer {
             } else {
                 // Restaurant is available, send the order to the restaurant
                 System.out.println("Sending order to restaurant: " + assignedRestaurant.getName());
-                rabbitTemplate.convertAndSend("restaurant.queue." + assignedRestaurant.getId(), message);
+                rabbitTemplate.convertAndSend("restaurant.queue." + assignedRestaurant.getId(), orderMessage);
             }
         } catch (Exception e) {
             e.printStackTrace();
