@@ -29,7 +29,7 @@ public class OrderConsumer {
             System.out.println("Processing order: " + order);
 
             // Check the current restaurant status
-            Restaurant assignedRestaurant = restaurantRepository.findById(order.getRestaurant().getId())
+            Restaurant assignedRestaurant = restaurantRepository.findById(order.getRestaurantId())
                     .orElseThrow(() -> new RuntimeException("Restaurant not found"));
 
             if (assignedRestaurant.isBusy()) {
@@ -39,7 +39,7 @@ public class OrderConsumer {
 
                 if (!availableRestaurants.isEmpty()) {
                     Restaurant newRestaurant = availableRestaurants.get(0);
-                    order.setRestaurant(newRestaurant);
+                    order.setRestaurantId(newRestaurant.getId());
                     System.out.println("Reassigning order to restaurant: " + newRestaurant.getName());
 
                     // Send the order to the new restaurant

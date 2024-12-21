@@ -7,16 +7,19 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long foodId; // ID món ăn
+    private Long foodId;
+
+    private Long quantity;
 
     @Column(nullable = false)
     private String customerName;
@@ -31,7 +34,5 @@ public class Order {
 
     private LocalDateTime completedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id")
-    private Restaurant restaurant; // Nhà hàng được gán đơn
+    private Long restaurantId;
 }

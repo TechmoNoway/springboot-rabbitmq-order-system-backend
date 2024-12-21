@@ -2,10 +2,12 @@ spring:
   application:
     name: springboot-rabbitmq-order-system-backend
   datasource:
+    hikari:
+      jdbc-url: jdbc:postgresql://localhost:5432/food_ordering
+      username: postgres
+      password: 332003
+      driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/food_ordering
-    username: postgres
-    password: 332003
-    driver-class-name: org.postgresql.Driver
   rabbitmq:
     host: localhost
     port: 5672

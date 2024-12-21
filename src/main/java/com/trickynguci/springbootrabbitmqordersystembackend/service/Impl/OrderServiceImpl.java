@@ -16,18 +16,21 @@ import java.util.List;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-    private RestaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
 
-    private SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
+    @Override
     public Order createOrder(Order order) {
         order.setStatus("PENDING");
         order.setCreatedAt(LocalDateTime.now());
+        order.setCompletedAt(LocalDateTime.now());
         return orderRepository.save(order);
     }
 
+    @Override
     public void processOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -41,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
         assignOrderToRestaurant(order);
 
         Restaurant assignedRestaurant = availableRestaurants.get(0);
-        order.setRestaurant(assignedRestaurant);
+        order.setRestaurantId(assignedRestaurant.getId());
         order.setStatus("IN_PROGRESS");
         orderRepository.save(order);
 
@@ -57,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
 
         if ("COMPLETED".equals(status)) {
             order.setCompletedAt(LocalDateTime.now());
-            Restaurant restaurant = order.getRestaurant();
+            Restaurant restaurant = restaurantRepository.findById(order.getRestaurantId()).orElse(null);
             if (restaurant != null) {
                 restaurant.getCurrentOrders().decrementAndGet();
             }
@@ -78,7 +81,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Restaurant assignedRestaurant = availableRestaurants.get(0);
-        order.setRestaurant(assignedRestaurant);
+        order.setRestaurantId(assignedRestaurant.getId());
         order.setStatus("IN_PROGRESS");
         orderRepository.save(order);
 
@@ -89,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        Restaurant currentRestaurant = order.getRestaurant();
+        Restaurant currentRestaurant = restaurantRepository.findById(order.getRestaurantId()).orElse(null);
         if (currentRestaurant == null) {
             throw new RuntimeException("Order is not assigned to any restaurant");
         }
@@ -103,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Restaurant newRestaurant = availableRestaurants.get(0);
-        order.setRestaurant(newRestaurant);
+        order.setRestaurantId(newRestaurant.getId());
         orderRepository.save(order);
 
         // Notify via WebSocket
